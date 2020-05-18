@@ -28,7 +28,8 @@ always@(*) begin
             6'b100010:ALUctr <= 3'b010;// sub
             6'b100100:ALUctr <= 3'b011;// and
             6'b100101:ALUctr <= 3'b100;// or
-            6'b101010:ALUctr <= 3'b101;// slt
+            6'b100110:ALUctr <= 3'b101;// xor
+            6'b101010:ALUctr <= 3'b110;// slt
         endcase
         Branch   <= 0;
         Jump     <= 0;
