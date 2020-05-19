@@ -1,8 +1,8 @@
 module MIPSCU(clk,reset);
 input      clk,reset;
 wire       RegDst,RegWr,ExtOp,ALUsrc,MemWr,MemtoReg;
-wire       Cin,Cout,ZF,OF,Branch,Jump;
-wire[2:0]  ALUctr;
+wire       Cin,Cout,ZF,OF,Branch,Jump,ConfirmBr;
+wire[4:0]  ALUctr;
 wire[4:0]  rs,rdR,rdI,rt,Muxrd,shamt;
 wire[5:0]  OprCtr,funct;
 wire[15:0] imm16;
@@ -24,7 +24,7 @@ assign Muxrd=RegDst?rdI:rdR;
 assign ALUinB=ALUsrc?(ExtOp?{16'hffff,imm16}:{16'h0000,imm16}):BusB;
 assign BusW=MemtoReg?DataBusR:ALUout;
 
-MIPSIFU InsFetchUnit(clk,reset,Branch,Jump,ZF,IR,imm16,imm26);
+MIPSIFU InsFetchUnit(clk,reset,Branch,Jump,ConfirmBr,IR,imm16,imm26);
 MIPSregFile regFile(clk,Muxrd,rs,rt,RegWr,BusW,BusA,BusB);
 MIPSalu32 ALU(BusA,ALUinB,Cin,Cout,ALUout,ALUctr,ZF,OF);
 MIPSDataMem DataMemory(clk,ALUout,MemWr,BusB,DataBusR);

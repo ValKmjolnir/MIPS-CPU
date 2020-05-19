@@ -12,10 +12,10 @@ initial begin
 end
 
 always@(*) begin
-    BusR <= memory[addr];
+    BusR <= memory[addr>>2];
 end
 
 always@(posedge clk) begin
-    if(wEn) memory[addr] <= BusW;
+    if(wEn) memory[addr>>2] <= BusW;
 end
 endmodule

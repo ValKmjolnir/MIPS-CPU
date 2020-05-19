@@ -1,6 +1,6 @@
 // 2020/5/14 tested
-module MIPSIFU(clk,reset,Branch,Jump,ZF,IR,imm16,imm26);
-    input wire        clk,reset,Branch,Jump,ZF;
+module MIPSIFU(clk,reset,Branch,Jump,ConfirmBr,IR,imm16,imm26);
+    input wire        clk,reset,Branch,Jump,ConfirmBr;
     input wire[15:0]  imm16;
     input wire[25:0]  imm26;
     output wire[31:0] IR;
@@ -11,7 +11,7 @@ module MIPSIFU(clk,reset,Branch,Jump,ZF,IR,imm16,imm26);
     assign adderA=PC+1;
     assign adderB=adderA+{14'b0,imm16};
     assign jmp={PC[29:26],imm26};
-    assign muxA=(Branch&&ZF)?adderB:adderA;
+    assign muxA=(Branch && ConfirmBr)?adderB:adderA;
     assign muxB=Jump?jmp:muxA;
     MIPSInstMem InstructionMemory({PC,2'b00},IR);
 initial begin
