@@ -1,31 +1,46 @@
 module MIPSdecoder
 (
-    OprCtr,  // operand
-    funct,   // function
-    RegDst,  // choose R-type or I-type rd
-    RegWr,   // register write
-    ExtOp,   // extend imm16 opr
-    ALUsrc,  // ALUinB source choice
-    ALUctr,  // ALU opr
-    MemWr,   // memory write(sw)
-    MemtoReg,// memory to register(lw)
-    Cin,     // ALU cin
-    Branch,  // beq bne
-    Jump     // j
+    OprCtr,   // operand
+    BrCh,     // IR[20:16] used to choose BGEZ or BLTZ
+    funct,    // function
+    IoprCh,   // choose R-type or I-type rd
+    RegWr,    // register write
+    ExtOp,    // extend imm16 opr
+    ALUsrc,   // choose imm16 or BusB
+    ALUctr,   // ALU opr
+    MemWr,    // memory write(sw)
+    MemtoReg, // memory to register(lw)
+    Cin,      // ALU cin
+    Branch,   // beq bne
+    Jump,     // jump
+    JrWr,     // jump register write
+    ShamtCtr, // use shamt(choose ALUsrc-out or shamt)
+    JumpReg,  // jump register
+    ByteWidth,// data memory I/O width
+    DmSignExt // data memory output extend mode
 );
 input wire[5:0] OprCtr,funct;
-output reg      RegDst,RegWr,ExtOp,ALUsrc,MemWr,MemtoReg,Cin,Branch,Jump;
+input wire[4:0] BrCh;
+output reg      IoprCh,RegWr,ExtOp,ALUsrc,MemWr,MemtoReg,Cin,Branch,Jump,JrWr,ShamtCtr,JumpReg,DmSignExt;
+output reg[1:0] ByteWidth;
 output reg[4:0] ALUctr;
+
+initial begin
+    ByteWidth <= 2'b00;
+    DmSignExt <= 0;
+end
 
 always@(*) begin
     if(OprCtr==6'b000000) begin
-        RegDst <= 0;
-        RegWr  <= 1;
+        IoprCh <= 0;
+        RegWr  <= (funct!=6'b001000);// only jr doesn't need write enable
         ExtOp  <= 0;
         ALUsrc <= 0;
         case(funct)
             6'b100000:ALUctr <= 5'b00001;// add
+            6'b100001:ALUctr <= 5'b00001;// addu
             6'b100010:ALUctr <= 5'b00010;// sub
+            6'b100011:ALUctr <= 5'b00010;// subu
             6'b100100:ALUctr <= 5'b00011;// and
             6'b100101:ALUctr <= 5'b00100;// or
             6'b100110:ALUctr <= 5'b00101;// xor
@@ -35,14 +50,34 @@ always@(*) begin
             6'b000000:ALUctr <= 5'b01001;// sll
             6'b000010:ALUctr <= 5'b01010;// srl
             6'b000011:ALUctr <= 5'b01011;// sra
+            6'b000100:ALUctr <= 5'b01001;// sllv
+            6'b000110:ALUctr <= 5'b01010;// srlv
+            6'b000111:ALUctr <= 5'b01011;// srav
         endcase
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
         MemtoReg <= 0;
+        JrWr     <= (funct==6'b001001);// jalr
+        ShamtCtr <= (funct==6'b000000 || funct==6'b000010 || funct==6'b000011);
+        JumpReg  <= (funct==6'b001000 || funct==6'b001001);// jr \ jalr
     end
     else if(OprCtr==6'b001000) begin// addi
-        RegDst   <= 1;
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 1;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00001;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001001) begin// addiu
+        IoprCh   <= 1;
         RegWr    <= 1;
         ExtOp    <= 0;
         ALUsrc   <= 1;
@@ -51,42 +86,204 @@ always@(*) begin
         Jump     <= 0;
         MemWr    <= 0;
         MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
     end
-    else if(OprCtr==6'b100011) begin// lw
-        RegDst   <= 1;
+    else if(OprCtr==6'b001010) begin// slti
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 1;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00111;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001011) begin// sltiu
+        IoprCh   <= 1;
         RegWr    <= 1;
         ExtOp    <= 0;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b01000;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001100) begin// andi
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 0;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00011;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001101) begin// ori
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 0;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00100;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001110) begin// xori
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 0;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00101;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b001111) begin// lui
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 0;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b10010;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b100011) begin// lw
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
         MemtoReg <= 1;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+        ByteWidth <= 2'b11;
+        DmSignExt <= 0;
     end
     else if(OprCtr==6'b101011) begin// sw
-        RegDst   <= 1;
+        IoprCh   <= 1;
         RegWr    <= 0;
-        ExtOp    <= 0;
+        ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 1;
         MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+        ByteWidth <= 2'b11;
+        DmSignExt <= 0;
     end
-    else if(OprCtr==6'b000100) begin// beq
-        RegDst   <= 1;
+    else if(OprCtr==6'b100000) begin// lb
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 1;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00001;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 1;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+        ByteWidth <= 2'b01;
+        DmSignExt <= 1;
+    end
+    else if(OprCtr==6'b100100) begin// lbu
+        IoprCh   <= 1;
+        RegWr    <= 1;
+        ExtOp    <= 1;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00001;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 0;
+        MemtoReg <= 1;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+        ByteWidth <= 2'b01;
+        DmSignExt <= 0;
+    end
+    else if(OprCtr==6'b101000) begin// sb
+        IoprCh   <= 1;
         RegWr    <= 0;
-        ExtOp    <= 0;
+        ExtOp    <= 1;
+        ALUsrc   <= 1;
+        ALUctr   <= 5'b00001;
+        Branch   <= 0;
+        Jump     <= 0;
+        MemWr    <= 1;
+        MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+        ByteWidth <= 2'b01;
+        DmSignExt <= 0;
+    end
+    else if(OprCtr==6'b000100 ||
+            OprCtr==6'b000101 ||
+            OprCtr==6'b000001 ||
+            OprCtr==6'b000111 ||
+            OprCtr==6'b000110) begin
+        IoprCh   <= 1;
+        RegWr    <= 0;
+        ExtOp    <= 1;
         ALUsrc   <= 0;
         ALUctr   <= 5'b01100;
+        case(OprCtr)
+            6'b000100:ALUctr <= 5'b01100;// beq
+            6'b000101:ALUctr <= 5'b01101;// bne
+            6'b000001:begin
+                if(BrCh==5'd1) ALUctr <= 5'b01110;// bgez
+                else           ALUctr <= 5'b10001;// bltz
+            end
+            6'b000111:ALUctr <= 5'b01111;// bgtz
+            6'b000110:ALUctr <= 5'b10000;// blez
+        endcase
         Branch   <= 1;
         Jump     <= 0;
         MemWr    <= 0;
         MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
     end
     else if(OprCtr==6'b000010) begin// j
-        RegDst   <= 0;
+        IoprCh   <= 0;
         RegWr    <= 0;
         ExtOp    <= 0;
         ALUsrc   <= 0;
@@ -95,6 +292,23 @@ always@(*) begin
         Jump     <= 1;
         MemWr    <= 0;
         MemtoReg <= 0;
+        JrWr     <= 0;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
+    end
+    else if(OprCtr==6'b000011) begin// jal
+        IoprCh   <= 0;
+        RegWr    <= 0;
+        ExtOp    <= 0;
+        ALUsrc   <= 0;
+        ALUctr   <= 5'b00000;
+        Branch   <= 0;
+        Jump     <= 1;
+        MemWr    <= 0;
+        MemtoReg <= 0;
+        JrWr     <= 1;
+        ShamtCtr <= 0;
+        JumpReg  <= 0;
     end
 end
 endmodule

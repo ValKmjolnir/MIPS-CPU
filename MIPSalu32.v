@@ -10,14 +10,13 @@ module MIPSalu32
     OF,      // overflow flag
     ConfirmBr// confirm branch
 );
-input wire[3:0]  opr;
+input wire[4:0]  opr;
 input wire       Cin;
 input wire[31:0] A,B;
-output reg       Extbit,ConfirmBr;
-output wire      ZF,OF;
+output reg       Extbit;
+output wire      ZF,OF,ConfirmBr;
 output reg[31:0] Res;
-assign ZF=(Res==0);
-assign OF=(Extbit^Res[31]);
+
 parameter 
     ADD =5'b00001,
     SUB =5'b00010,
@@ -35,27 +34,33 @@ parameter
     BGEZ=5'b01110,
     BGTZ=5'b01111,
     BLEZ=5'b10000,
-    BLTZ=5'b10001;
+    BLTZ=5'b10001,
+    LUI =5'b10010;
+
+assign ZF=(Res==0);
+assign OF=(Extbit^Res[31]);
+assign ConfirmBr=(opr==BEQ || opr==BNE || opr==BGEZ || opr==BGTZ || opr==BLEZ || opr==BLTZ) && (!ZF);
+
 always@(*) begin
-    ConfirmBr <= 0;
     case(opr)
         ADD: {Extbit,Res}=A+B;
         SUB: {Extbit,Res}=A+(~B+1);
         AND: Res=A & B;
         OR : Res=A | B;
         XOR: Res=A ^ B;
+        NOR: Res=~(A|B);
         SLT: Res=$signed(A) < $signed(B);
         SLTU:Res=A < B;
         SLL: Res=A << B[4:0];
         SRL: Res=A >> B[4:0];
         SRA: Res=$signed(A) >> B[4:0];
-        BEQ: ConfirmBr=(A == B);
-        BNE: ConfirmBr=(A != B);
-        BGEZ:ConfirmBr=($signed(A)>=$signed(0));
-        BGTZ:ConfirmBr=($signed(A)>$signed(0));
-        BLEZ:ConfirmBr=($signed(A)<=$signed(0));
-        BLTZ:ConfirmBr=($signed(A)<$signed(0));
-        NOR: Res=~(A|B);
+        BEQ: Res=(A == B);
+        BNE: Res=(A != B);
+        BGEZ:Res=($signed(A)>=$signed(0));
+        BGTZ:Res=($signed(A)> $signed(0));
+        BLEZ:Res=($signed(A)<=$signed(0));
+        BLTZ:Res=($signed(A)< $signed(0));
+        LUI: Res=(B<<16);
     endcase
 end
 endmodule
