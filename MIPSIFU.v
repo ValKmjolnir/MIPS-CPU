@@ -28,7 +28,7 @@ assign adderB=adderA+{imm16[15]?14'h3fff:14'h0000,imm16};
 assign JmpAddr={PC[29:26],imm26};
 assign muxA=(Branch && ConfirmBr)?adderB:adderA;
 assign muxB=Jump?JmpAddr:muxA;
-assign muxC=JumpReg?BusA[31:0]:muxB;
+assign muxC=JumpReg?BusA[31:2]:muxB;
 MIPSInstMem InstructionMemory({PC,2'b00},IR);
 
 initial begin
@@ -37,6 +37,6 @@ end
 
 always@(posedge clk or negedge reset) begin
     if(!reset) PC<=0;
-    else PC<=muxB;
+    else PC<=muxC;
 end
 endmodule

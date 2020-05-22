@@ -2,7 +2,7 @@ module MIPSCU(clk,reset);
 
 input      clk,reset;
 wire       IoprCh,RegWr,ExtOp,ALUsrc,MemWr,MemtoReg,JrWr,ShamtCtr,JumpReg,Branch,Jump;
-wire       Cin,Cout,ZF,OF,ConfirmBr;
+wire       Cin,Cout,ZF,OF,ConfirmBr,OverflowCheck;
 wire[1:0]  ByteWidth;
 wire       DmSignExt,DmError;
 wire[4:0]  ALUctr;
@@ -34,6 +34,7 @@ MIPSdecoder decoder
     ExtOp,
     ALUsrc,
     ALUctr,
+    OverflowCheck,
     MemWr,
     MemtoReg,
     Cin,
@@ -47,7 +48,7 @@ MIPSdecoder decoder
     );
 MIPSIFU InsFetchUnit(clk,reset,Branch,Jump,ConfirmBr,JumpReg,PC,IR,imm16,imm26,BusA);
 MIPSregFile regFile(clk,Muxrd,rs,rt,RegWr,BusW,BusA,BusB);
-MIPSalu32 ALU(BusA,ALUinB,Cin,Cout,ALUout,ALUctr,ZF,OF,ConfirmBr);
+MIPSalu32 ALU(BusA,ALUinB,Cin,Cout,ALUout,ALUctr,ZF,OF,ConfirmBr,OverflowCheck);
 MIPSDataMem DataMemory(clk,ALUout,MemWr,BusB,DataBusR,ByteWidth,DmSignExt,DmError);
 
 endmodule

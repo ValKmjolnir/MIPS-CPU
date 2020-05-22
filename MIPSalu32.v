@@ -1,17 +1,18 @@
 module MIPSalu32
 (
-    A,       // input A
-    B,       // input B
-    Cin,     // carry in
-    Extbit,  // carry out/extra bit
-    Res,     // result
-    opr,     // ALUctr
-    ZF,      // zero flag
-    OF,      // overflow flag
-    ConfirmBr// confirm branch
+    A,           // input A
+    B,           // input B
+    Cin,         // carry in
+    Extbit,      // carry out/extra bit
+    Res,         // result
+    opr,         // ALUctr
+    ZF,          // zero flag
+    OF,          // overflow flag
+    ConfirmBr,   // confirm branch
+    OverflowCheck// check overflow
 );
 input wire[4:0]  opr;
-input wire       Cin;
+input wire       Cin,OverflowCheck;
 input wire[31:0] A,B;
 output reg       Extbit;
 output wire      ZF,OF,ConfirmBr;
@@ -38,7 +39,7 @@ parameter
     LUI =5'b10010;
 
 assign ZF=(Res==0);
-assign OF=(Extbit^Res[31]);
+assign OF=(Extbit^Res[31])&OverflowCheck;
 assign ConfirmBr=(opr==BEQ || opr==BNE || opr==BGEZ || opr==BGTZ || opr==BLEZ || opr==BLTZ) && (!ZF);
 
 always@(*) begin
@@ -56,10 +57,10 @@ always@(*) begin
         SRA: Res=$signed(A) >> B[4:0];
         BEQ: Res=(A == B);
         BNE: Res=(A != B);
-        BGEZ:Res=($signed(A)>=$signed(0));
-        BGTZ:Res=($signed(A)> $signed(0));
-        BLEZ:Res=($signed(A)<=$signed(0));
-        BLTZ:Res=($signed(A)< $signed(0));
+        BGEZ:Res=$signed(A) >=$signed(0);
+        BGTZ:Res=$signed(A) > $signed(0);
+        BLEZ:Res=$signed(A) <=$signed(0);
+        BLTZ:Res=$signed(A) < $signed(0);
         LUI: Res=(B<<16);
     endcase
 end

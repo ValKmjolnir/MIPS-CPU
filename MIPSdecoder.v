@@ -1,27 +1,42 @@
 module MIPSdecoder
 (
-    OprCtr,   // operand
-    BrCh,     // IR[20:16] used to choose BGEZ or BLTZ
-    funct,    // function
-    IoprCh,   // choose R-type or I-type rd
-    RegWr,    // register write
-    ExtOp,    // extend imm16 opr
-    ALUsrc,   // choose imm16 or BusB
-    ALUctr,   // ALU opr
-    MemWr,    // memory write(sw)
-    MemtoReg, // memory to register(lw)
-    Cin,      // ALU cin
-    Branch,   // beq bne
-    Jump,     // jump
-    JrWr,     // jump register write
-    ShamtCtr, // use shamt(choose ALUsrc-out or shamt)
-    JumpReg,  // jump register
-    ByteWidth,// data memory I/O width
-    DmSignExt // data memory output extend mode
+    OprCtr,        // operand
+    BrCh,          // IR[20:16] used to choose BGEZ or BLTZ
+    funct,         // function
+    IoprCh,        // choose R-type or I-type rd
+    RegWr,         // register write
+    ExtOp,         // extend imm16 opr
+    ALUsrc,        // choose imm16 or BusB
+    ALUctr,        // ALU opr
+    OverflowCheck, // check overflow
+    MemWr,         // memory write(sw)
+    MemtoReg,      // memory to register(lw)
+    Cin,           // ALU cin
+    Branch,        // beq bne
+    Jump,          // jump
+    JrWr,          // jump register write
+    ShamtCtr,      // use shamt(choose ALUsrc-out or shamt)
+    JumpReg,       // jump register
+    ByteWidth,     // data memory I/O width
+    DmSignExt      // data memory output extend mode
 );
 input wire[5:0] OprCtr,funct;
 input wire[4:0] BrCh;
-output reg      IoprCh,RegWr,ExtOp,ALUsrc,MemWr,MemtoReg,Cin,Branch,Jump,JrWr,ShamtCtr,JumpReg,DmSignExt;
+output reg
+    IoprCh,
+    RegWr,
+    ExtOp,
+    ALUsrc,
+    OverflowCheck,
+    MemWr,
+    MemtoReg,
+    Cin,
+    Branch,
+    Jump,
+    JrWr,
+    ShamtCtr,
+    JumpReg,
+    DmSignExt;
 output reg[1:0] ByteWidth;
 output reg[4:0] ALUctr;
 
@@ -54,6 +69,7 @@ always@(*) begin
             6'b000110:ALUctr <= 5'b01010;// srlv
             6'b000111:ALUctr <= 5'b01011;// srav
         endcase
+        OverflowCheck <= (funct==6'b100000 || funct==6'b100010);
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -68,6 +84,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 1;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -79,9 +96,10 @@ always@(*) begin
     else if(OprCtr==6'b001001) begin// addiu
         IoprCh   <= 1;
         RegWr    <= 1;
-        ExtOp    <= 0;
+        ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -96,6 +114,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00111;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -107,9 +126,10 @@ always@(*) begin
     else if(OprCtr==6'b001011) begin// sltiu
         IoprCh   <= 1;
         RegWr    <= 1;
-        ExtOp    <= 0;
+        ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b01000;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -124,6 +144,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00011;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -138,6 +159,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00100;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -152,6 +174,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00101;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -166,6 +189,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 1;
         ALUctr   <= 5'b10010;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -180,6 +204,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -196,6 +221,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 1;
@@ -212,6 +238,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -228,6 +255,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 0;
@@ -244,6 +272,7 @@ always@(*) begin
         ExtOp    <= 1;
         ALUsrc   <= 1;
         ALUctr   <= 5'b00001;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 0;
         MemWr    <= 1;
@@ -263,7 +292,6 @@ always@(*) begin
         RegWr    <= 0;
         ExtOp    <= 1;
         ALUsrc   <= 0;
-        ALUctr   <= 5'b01100;
         case(OprCtr)
             6'b000100:ALUctr <= 5'b01100;// beq
             6'b000101:ALUctr <= 5'b01101;// bne
@@ -274,6 +302,7 @@ always@(*) begin
             6'b000111:ALUctr <= 5'b01111;// bgtz
             6'b000110:ALUctr <= 5'b10000;// blez
         endcase
+        OverflowCheck <= 0;
         Branch   <= 1;
         Jump     <= 0;
         MemWr    <= 0;
@@ -288,6 +317,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 0;
         ALUctr   <= 5'b00000;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 1;
         MemWr    <= 0;
@@ -302,6 +332,7 @@ always@(*) begin
         ExtOp    <= 0;
         ALUsrc   <= 0;
         ALUctr   <= 5'b00000;
+        OverflowCheck <= 0;
         Branch   <= 0;
         Jump     <= 1;
         MemWr    <= 0;
