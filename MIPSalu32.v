@@ -54,7 +54,7 @@ always@(*) begin
         SLTU:Res=A < B;
         SLL: Res=A << B[4:0];
         SRL: Res=A >> B[4:0];
-        SRA: Res=$signed(A) >> B[4:0];
+        SRA: Res=$signed(A) >>> B[4:0];
         BEQ: Res=(A == B);
         BNE: Res=(A != B);
         BGEZ:Res=$signed(A) >=$signed(0);

@@ -16,6 +16,7 @@ module MIPSdecoder
     Jump,          // jump
     JrWr,          // jump register write
     ShamtCtr,      // use shamt(choose ALUsrc-out or shamt)
+    ShiftCtr,      // used in sll srl sra sllv srlv srav
     JumpReg,       // jump register
     ByteWidth,     // data memory I/O width
     DmSignExt      // data memory output extend mode
@@ -35,6 +36,7 @@ output reg
     Jump,
     JrWr,
     ShamtCtr,
+    ShiftCtr,
     JumpReg,
     DmSignExt;
 output reg[1:0] ByteWidth;
@@ -76,6 +78,8 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= (funct==6'b001001);// jalr
         ShamtCtr <= (funct==6'b000000 || funct==6'b000010 || funct==6'b000011);
+        ShiftCtr <= (funct==6'b000000 || funct==6'b000010 || funct==6'b000011 ||
+                    funct==6'b000100 || funct==6'b000110 || funct==6'b000111);
         JumpReg  <= (funct==6'b001000 || funct==6'b001001);// jr \ jalr
     end
     else if(OprCtr==6'b001000) begin// addi
@@ -91,6 +95,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001001) begin// addiu
@@ -106,6 +111,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001010) begin// slti
@@ -121,6 +127,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001011) begin// sltiu
@@ -136,6 +143,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001100) begin// andi
@@ -151,6 +159,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001101) begin// ori
@@ -166,6 +175,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001110) begin// xori
@@ -181,6 +191,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b001111) begin// lui
@@ -196,6 +207,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b100011) begin// lw
@@ -211,6 +223,7 @@ always@(*) begin
         MemtoReg <= 1;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
         ByteWidth <= 2'b11;
         DmSignExt <= 0;
@@ -228,6 +241,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
         ByteWidth <= 2'b11;
         DmSignExt <= 0;
@@ -245,6 +259,7 @@ always@(*) begin
         MemtoReg <= 1;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
         ByteWidth <= 2'b01;
         DmSignExt <= 1;
@@ -262,6 +277,7 @@ always@(*) begin
         MemtoReg <= 1;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
         ByteWidth <= 2'b01;
         DmSignExt <= 0;
@@ -279,6 +295,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
         ByteWidth <= 2'b01;
         DmSignExt <= 0;
@@ -309,6 +326,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b000010) begin// j
@@ -324,6 +342,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 0;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
     else if(OprCtr==6'b000011) begin// jal
@@ -339,6 +358,7 @@ always@(*) begin
         MemtoReg <= 0;
         JrWr     <= 1;
         ShamtCtr <= 0;
+        ShiftCtr <= 0;
         JumpReg  <= 0;
     end
 end
