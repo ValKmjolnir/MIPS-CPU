@@ -36,7 +36,7 @@ always@(*) begin
             1:BusR <= {DmSignExt?(memory[addr>>2][31]? 16'hffff:16'h0000):16'h0000,memory[addr>>2][31:16]};
         endcase
     end
-    else if(ByteWidth==2'b01) begin// 1 bytes
+    else if(ByteWidth==2'b01) begin// 1 byte
         case (addr[1:0])
             2'b00:BusR <= {DmSignExt?(memory[addr>>2][7 ]? 24'hffffff:24'h000000):24'h000000,memory[addr>>2][7:0]  };
             2'b01:BusR <= {DmSignExt?(memory[addr>>2][15]? 24'hffffff:24'h000000):24'h000000,memory[addr>>2][15:8] };
@@ -57,10 +57,9 @@ always@(posedge clk) begin
             case (addr[0])
                 0:memory[addr>>2][15:0]  <= BusW[15:0];
                 1:memory[addr>>2][31:16] <= BusW[15:0];
-                
             endcase
         end
-        else if(ByteWidth==2'b01) begin// 1 bytes
+        else if(ByteWidth==2'b01) begin// 1 byte
             case (addr[1:0])
                 2'b00:memory[addr>>2][7:0]   <= BusW[7:0];
                 2'b01:memory[addr>>2][15:8]  <= BusW[7:0];

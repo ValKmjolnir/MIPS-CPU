@@ -7,8 +7,6 @@ module testbench;
 initial begin
     clk   <= 0;
     reset <= 1;
-    #5 reset <=0;
-    #5 reset <=1;
 end
 always begin
     #5 clk <= 1;
