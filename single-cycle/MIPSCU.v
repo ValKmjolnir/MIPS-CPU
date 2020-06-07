@@ -6,12 +6,12 @@ wire       Cin,Cout,ZF,OF,ConfirmBr,OverflowCheck,ShiftCtr;
 wire[1:0]  ByteWidth;
 wire       DmSignExt,DmError;
 wire[4:0]  ALUctr;
-wire[4:0]  rs,rt,rd,Muxrd,shamt;
+wire[4:0]  rs,rt,rd,Muxrd,shamt,ShiftRs,ShiftRt;
 wire[5:0]  OprCtr,funct;
 wire[15:0] imm16;
 wire[25:0] imm26;
 wire[29:0] PC;
-wire[31:0] ShiftRs,ShiftRt,BusA,BusB,BusW,IR,ALUinB,ALUout,DataBusR;
+wire[31:0] BusA,BusB,BusW,IR,ALUinB,ALUout,DataBusR;
 
 assign OprCtr=IR[31:26];
 assign shamt=IR[10:6];
