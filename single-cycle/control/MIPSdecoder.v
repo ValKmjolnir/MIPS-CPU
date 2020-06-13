@@ -62,7 +62,7 @@ always@(*) begin
             6'b100101:ALUctr <= 5'b00100;// or
             6'b100110:ALUctr <= 5'b00101;// xor
             6'b100111:ALUctr <= 5'b00110;// nor
-            6'b101010:ALUctr <= 5'b00110;// slt
+            6'b101010:ALUctr <= 5'b00111;// slt
             6'b101011:ALUctr <= 5'b01000;// sltu
             6'b000000:ALUctr <= 5'b01001;// sll
             6'b000010:ALUctr <= 5'b01010;// srl
@@ -347,7 +347,7 @@ always@(*) begin
     end
     else if(OprCtr==6'b000011) begin// jal
         IoprCh   <= 0;
-        RegWr    <= 0;
+        RegWr    <= 1;
         ExtOp    <= 0;
         ALUsrc   <= 0;
         ALUctr   <= 5'b00000;
