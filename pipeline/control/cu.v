@@ -1,7 +1,7 @@
 module cu(clk,reset);
 
 input wire clk,reset;
-wire        JumpReg,Jump,Branch,IoprCtr,JrWr,RegWr,ExtOp,ImmCh,ShamtCh,ShiftCtr,MemWr,MemtoReg,Cout,ZF,OF,OverflowCheck,DmSignExt,DmError;
+wire        JumpReg,Jump,Branch,IoprCtr,JrWr,RegWr,ExtOp,ImmCh,ShamtCh,ShiftCtr,MemWr,MemtoReg,Cout,ZF,OF,OverflowCheck,DmSignExt,DmError,HazardCtr;
 wire[1:0]   ByteWidth;
 wire[4:0]   ALUopr,addrA,addrB,addrW,shamt;
 wire[15:0]  imm16;
@@ -23,8 +23,8 @@ assign imm26 = ifid_out[25:0];
 assign ALUinA = ShiftCtr? BusB:BusA;
 assign ALUinB = ShamtCh? (ImmCh? {(ExtOp? (imm16[15]? 16'hffff:16'h0000):16'h0000),imm16}:(ShiftCtr? BusA:BusB)):{27'd0,shamt};
 
-ifu        mips_ifu(clk,reset,nPC,PC,IR);
-if_id_reg  mips_ifid(clk,PC,IR,ifid_out);
+ifu        mips_ifu(clk,reset,nPC,PC,IR,HazardCtr);
+if_id_reg  mips_ifid(clk,PC,IR,ifid_out,HazardCtr);
 if_id_decoder mips_ifid_dec(
     ifid_out,
     ExtOp,   // imm16 sign extend
@@ -58,5 +58,6 @@ mem_wr_decoder    mips_memwr_dec(
     RegWr,    // regFile write enable       
     MemtoReg  // write dm data to register
 );
+hazard mips_hazard(ifid_out,HazardCtr);
 
 endmodule
