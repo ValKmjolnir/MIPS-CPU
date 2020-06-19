@@ -1,6 +1,6 @@
-module ifu(clk,reset,nPC,PC,IR);
+module ifu(clk,reset,nPC,PC,IR,HazardCtr);
 
-input wire        clk,reset;
+input wire        clk,reset,HazardCtr;
 input wire[31:0]  nPC;
 output reg[31:0]  PC;
 output wire[31:0] IR;
@@ -12,8 +12,9 @@ initial begin
 end
 
 always@(posedge clk or negedge reset) begin
-    if(!reset) PC <= 32'd0;
-    else       PC <= nPC;
+    if(!reset)          PC <= 32'd0;
+    else if(!HazardCtr) PC <= nPC;
+    else                PC <= PC;
 end
 
 endmodule
