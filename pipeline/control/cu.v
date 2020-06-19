@@ -34,6 +34,8 @@ if_id_decoder mips_ifid_dec(
     Jump,    // set PC = {PC[31:28],imm26,2'b00} to jump
     JumpReg  // set PC = BusA to jump
 );
+hazard mips_hazard(ifid_out,HazardCtr);
+
 regFile    mips_regfile(clk,RegWr,addrA,addrB,addrW,BusA,BusB,BusW);
 id_ex_reg  mips_idex(clk,ifid_out[63:32],ALUinA,ALUinB,BusB,ifid_out[31:0],idex_out);
 id_ex_decoder mips_idex_dec(
@@ -41,6 +43,7 @@ id_ex_decoder mips_idex_dec(
     OverflowCheck,// check overflow
     ALUopr        // choose alu function type
 );
+
 alu        mips_alu(idex_out[127:96],idex_out[95:64],Cout,ALUres,ALUopr,ZF,OF,Branch,OverflowCheck);
 ex_mem_reg mips_exmem(clk,idex_out[159:128],ALUres,idex_out[63:32],idex_out[31:0],exmem_out);
 ex_mem_decoder mips_exmem_dec(
@@ -49,6 +52,7 @@ ex_mem_decoder mips_exmem_dec(
     DmSignExt,// dm data sign extend
     ByteWidth // byte width
 );
+
 dm         mips_dm(clk,exmem_out[95:64],MemWr,exmem_out[63:32],Dmout,ByteWidth,DmSignExt,DmError);
 mem_wr_reg mips_memwr(clk,exmem_out[127:96],exmem_out[95:64],Dmout,exmem_out[31:0],memwr_out);
 mem_wr_decoder    mips_memwr_dec(
@@ -58,6 +62,5 @@ mem_wr_decoder    mips_memwr_dec(
     RegWr,    // regFile write enable       
     MemtoReg  // write dm data to register
 );
-hazard mips_hazard(ifid_out,HazardCtr);
 
 endmodule
