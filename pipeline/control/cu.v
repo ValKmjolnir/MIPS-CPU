@@ -2,6 +2,7 @@ module cu(clk,reset);
 
 input wire clk,reset;
 wire        JumpReg,Jump,Branch,IoprCtr,JrWr,RegWr,ExtOp,ImmCh,ShamtCh,ShiftCtr,MemWr,MemtoReg,Cout,ZF,OF,OverflowCheck,DmSignExt,DmError,HazardCtr;
+wire        BusAChange,BusBChange,ALUinAChange,ALUinBChange,LoadChange;
 wire[1:0]   ByteWidth;
 wire[4:0]   ALUopr,addrA,addrB,addrW,shamt;
 wire[15:0]  imm16;
@@ -20,8 +21,8 @@ assign BusW  = JrWr? memwr_out[127:96]:(MemtoReg? memwr_out[63:32]:memwr_out[95:
 assign shamt = ifid_out[10:6];
 assign imm16 = ifid_out[15:0];
 assign imm26 = ifid_out[25:0];
-assign ALUinA = ShiftCtr? BusB:BusA;
-assign ALUinB = ShamtCh? (ImmCh? {(ExtOp? (imm16[15]? 16'hffff:16'h0000):16'h0000),imm16}:(ShiftCtr? BusA:BusB)):{27'd0,shamt};
+assign ALUinA = ShiftCtr? (BusBChange?ALUres:BusB):(BusAChange?ALUres:BusA);
+assign ALUinB = ShamtCh? (ImmCh? {(ExtOp? (imm16[15]? 16'hffff:16'h0000):16'h0000),imm16}:(ShiftCtr? (BusAChange?ALUres:BusA):(BusBChange?ALUres:BusB))):{27'd0,shamt};
 
 ifu        mips_ifu(clk,reset,nPC,PC,IR,HazardCtr);
 if_id_reg  mips_ifid(clk,PC,IR,ifid_out,HazardCtr);
@@ -44,8 +45,8 @@ id_ex_decoder mips_idex_dec(
     ALUopr        // choose alu function type
 );
 
-alu        mips_alu(idex_out[127:96],idex_out[95:64],Cout,ALUres,ALUopr,ZF,OF,Branch,OverflowCheck);
-ex_mem_reg mips_exmem(clk,idex_out[159:128],ALUres,idex_out[63:32],idex_out[31:0],exmem_out);
+alu        mips_alu((ALUinAChange?BusW:idex_out[127:96]),(ALUinBChange?BusW:idex_out[95:64]),Cout,ALUres,ALUopr,ZF,OF,Branch,OverflowCheck);
+ex_mem_reg mips_exmem(clk,idex_out[159:128],ALUres,(LoadChange?BusW:idex_out[63:32]),idex_out[31:0],exmem_out);
 ex_mem_decoder mips_exmem_dec(
     exmem_out,
     MemWr,    // dm write enable
@@ -61,6 +62,17 @@ mem_wr_decoder    mips_memwr_dec(
     JrWr,     // jal/jalr will store PC to register#31
     RegWr,    // regFile write enable       
     MemtoReg  // write dm data to register
+);
+
+forwarding mips_fwd(
+    ifid_out,
+    idex_out,
+    memwr_out,
+    BusAchange,   // change BusA
+    BusBchange,   // change BusB
+    ALUinAchange, // change ALUinA
+    ALUinBchange, // change ALUinB
+    LoadChange    // change BusB-DmDatain
 );
 
 endmodule
