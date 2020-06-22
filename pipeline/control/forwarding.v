@@ -3,14 +3,14 @@ module forwarding
     ifid_reg,
     idex_reg,
     memwr_reg,
-    BusAchange,
-    BusBchange,
-    ALUinAchange,
-    ALUinBchange,
+    BusAChange,
+    BusBChange,
+    ALUinAChange,
+    ALUinBChange,
     LoadChange
 );
 
-input wire[43:0] ifid_reg;
+input wire[63:0] ifid_reg;
 wire[5:0] ifid_op;
 wire[4:0] ifid_rs,ifid_rt,ifid_rd;
 input wire[159:0] idex_reg;
@@ -22,7 +22,7 @@ wire[4:0] memwr_rt;
 wire idex_is_slsr;
 wire ifid_is_rtype,idex_is_rtype,ifid_is_itype,idex_is_itype;
 wire memwr_is_load,memwr_is_jal;
-output reg BusAchange,BusBchange,ALUinAchange,ALUinBchange,LoadChange;
+output reg BusAChange,BusBChange,ALUinAChange,ALUinBChange,LoadChange;
 
 assign ifid_op=ifid_reg[31:26];
 assign ifid_rs=ifid_reg[25:21];
@@ -56,49 +56,49 @@ assign memwr_is_jal=((memwr_op==6'b000000 & memwr_funct==6'b001001) | memwr_op==
 
 always@(*) begin
     if(ifid_is_rtype & idex_is_rtype) begin
-        BusAchange <= (idex_rd==ifid_rs && idex_rd!=5'd0);
-        BusBchange <= (idex_rd==ifid_rt && idex_rd!=5'd0);
+        BusAChange <= (idex_rd==ifid_rs && idex_rd!=5'd0);
+        BusBChange <= (idex_rd==ifid_rt && idex_rd!=5'd0);
     end
     else if(ifid_is_itype & idex_is_rtype) begin
-        BusAchange <= (idex_rd==ifid_rs && idex_rd!=5'd0);
-        BusBchange <= 0;
+        BusAChange <= (idex_rd==ifid_rs && idex_rd!=5'd0);
+        BusBChange <= 0;
     end
     else if(ifid_is_rtype & idex_is_itype) begin
-        BusAchange <= (idex_rt==ifid_rs && idex_rt!=5'd0);
-        BusBchange <= (idex_rt==ifid_rt && idex_rt!=5'd0);
+        BusAChange <= (idex_rt==ifid_rs && idex_rt!=5'd0);
+        BusBChange <= (idex_rt==ifid_rt && idex_rt!=5'd0);
     end
     else if(ifid_is_itype & idex_is_itype) begin
-        BusAchange <= (idex_rt==ifid_rs && idex_rd!=5'd0);
-        BusBchange <= 0;
+        BusAChange <= (idex_rt==ifid_rs && idex_rd!=5'd0);
+        BusBChange <= 0;
     end
     else begin
-        BusAchange <= 0;
-        BusBchange <= 0;
+        BusAChange <= 0;
+        BusBChange <= 0;
     end
 
     if(memwr_is_load & idex_is_rtype) begin
-        ALUinAchange <= (memwr_rt==(idex_is_slsr?idex_rt:idex_rs) && memwr_rt!=5'd0);
-        ALUinBchange <= (memwr_rt==(idex_is_slsr?idex_rs:idex_rt) && memwr_rt!=5'd0);
+        ALUinAChange <= (memwr_rt==(idex_is_slsr?idex_rt:idex_rs) && memwr_rt!=5'd0);
+        ALUinBChange <= (memwr_rt==(idex_is_slsr?idex_rs:idex_rt) && memwr_rt!=5'd0);
         LoadChange   <= 0;
     end
     else if(memwr_is_jal & idex_is_rtype) begin
-        ALUinAchange <= ((idex_is_slsr?idex_rt:idex_rs)==5'd31);
-        ALUinBchange <= ((idex_is_slsr?idex_rs:idex_rt)==5'd31);
+        ALUinAChange <= ((idex_is_slsr?idex_rt:idex_rs)==5'd31);
+        ALUinBChange <= ((idex_is_slsr?idex_rs:idex_rt)==5'd31);
         LoadChange   <= 0;
     end
     else if(memwr_is_load & idex_is_itype) begin
-        ALUinAchange <= (memwr_rt==idex_rs && memwr_rt!=5'd0);
-        ALUinBchange <= 0;
+        ALUinAChange <= (memwr_rt==idex_rs && memwr_rt!=5'd0);
+        ALUinBChange <= 0;
         LoadChange   <= (memwr_rt==idex_rt && memwr_rt!=5'd0);
     end
     else if(memwr_is_jal & idex_is_itype) begin
-        ALUinAchange <= (idex_rs==5'd31);
-        ALUinBchange <= 0;
+        ALUinAChange <= (idex_rs==5'd31);
+        ALUinBChange <= 0;
         LoadChange   <= (idex_rt==5'd31);
     end
     else begin
-        ALUinAchange <= 0;
-        ALUinBchange <= 0;
+        ALUinAChange <= 0;
+        ALUinBChange <= 0;
         LoadChange   <= 0;
     end
 end

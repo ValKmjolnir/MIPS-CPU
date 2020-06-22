@@ -30,7 +30,7 @@ if_id_decoder mips_ifid_dec(
     ifid_out,
     ExtOp,   // imm16 sign extend
     ImmCh,   // choose extended imm16 as BusB
-    ShamtCtr,// choose shamt as BusB
+    ShamtCh, // choose shamt as BusB
     ShiftCtr,// swap BusA and BusB
     Jump,    // set PC = {PC[31:28],imm26,2'b00} to jump
     JumpReg  // set PC = BusA to jump
@@ -68,10 +68,10 @@ forwarding mips_fwd(
     ifid_out,
     idex_out,
     memwr_out,
-    BusAchange,   // change BusA
-    BusBchange,   // change BusB
-    ALUinAchange, // change ALUinA
-    ALUinBchange, // change ALUinB
+    BusAChange,   // change BusA
+    BusBChange,   // change BusB
+    ALUinAChange, // change ALUinA
+    ALUinBChange, // change ALUinB
     LoadChange    // change BusB-DmDatain
 );
 

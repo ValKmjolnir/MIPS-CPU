@@ -1,8 +1,8 @@
-module if_id_decoder(ifid_reg,ExtOp,ImmCh,ShamtCtr,ShiftCtr,Jump,JumpReg);
+module if_id_decoder(ifid_reg,ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg);
 
 input wire[63:0] ifid_reg;
 wire[5:0]        op,funct;
-output wire      ExtOp,ImmCh,ShamtCtr,ShiftCtr,Jump,JumpReg;
+output wire      ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg;
 
 assign op=ifid_reg[31:26];
 assign funct=ifid_reg[5:0];
@@ -42,7 +42,7 @@ assign ImmCh=(
     op==6'b000111 |
     op==6'b000110
 );
-assign ShamtCtr=(op==6'b000000 &&(
+assign ShamtCh=(op==6'b000000 &&(
     funct==6'b000000 |
     funct==6'b000010 |
     funct==6'b000011
