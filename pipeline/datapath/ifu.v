@@ -12,9 +12,8 @@ initial begin
 end
 
 always@(posedge clk or negedge reset) begin
-    if(!reset)          PC <= 32'd0;
-    else if(!HazardCtr) PC <= nPC;
-    else                PC <= PC;
+    if(!reset)             PC <= 32'd0;
+    else if(!HazardCtr)    PC <= nPC;
 end
 
 endmodule

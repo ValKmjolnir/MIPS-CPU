@@ -14,6 +14,6 @@ initial begin
     for(i=0;i<32;i=i+1) register[i] <= 32'd0;
 end
 always@(posedge clk) begin
-    if(RegWr && addrW) register[addrW] <= BusW;
+    if(RegWr && addrW!=5'b00000) register[addrW] <= BusW;
 end
 endmodule
