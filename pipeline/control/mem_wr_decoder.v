@@ -38,5 +38,10 @@ assign RegWr=!(
     op==6'b000110 |
     op==6'b000010
 );
+assign MemtoReg=(
+    op==6'b100011 |
+    op==6'b100000 |
+    op==6'b100100
+);
 
 endmodule
