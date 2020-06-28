@@ -12,7 +12,9 @@ module forwarding
     ALUinBChange,
     LoadChange,
     JalAChange,
-    JalBChange
+    JalBChange,
+    RaAChange,
+    RaBChange
 );
 
 input wire[63:0] ifid_reg;
@@ -34,6 +36,7 @@ output reg idexBusAChange,idexBusBChange;
 output reg exmemBusAChange,exmemBusBChange;
 output reg ALUinAChange,ALUinBChange;
 output reg LoadChange,JalAChange,JalBChange;
+output reg RaAChange,RaBChange;
 
 assign ifid_op=ifid_reg[31:26];
 assign ifid_rs=ifid_reg[25:21];
@@ -56,6 +59,7 @@ assign ifid_is_itype=(ifid_op!=6'b000000 & ifid_op!=6'b000010 & ifid_op!=6'b0000
 assign ifid_is_store=(ifid_op==6'b101011 | ifid_op==6'b101000);
 assign idex_is_rtype=(idex_op==6'b000000);
 assign idex_is_itype=(idex_op!=6'b000000 & idex_op!=6'b000010 & idex_op!=6'b000011 & idex_op!=6'b101011 & idex_op!=6'b101000);
+assign idex_is_jal=((idex_op==6'b000000 & idex_funct==6'b001001) | idex_op==6'b000011);
 assign exmem_is_rtype=(exmem_op==6'b000000);
 assign exmem_is_itype=(exmem_op!=6'b000000 & exmem_op!=6'b000010 & exmem_op!=6'b000011 & exmem_op!=6'b101011 & exmem_op!=6'b101000);
 assign memwr_is_load=(memwr_op==6'b100011 | memwr_op==6'b100000 | memwr_op==6'b100100);
@@ -103,13 +107,26 @@ always@(*) begin
         JalAChange <= (ifid_rs==5'd31);
         JalBChange <= (ifid_rt==5'd31);
     end
-    else if(ifid_is_itype) begin
+    else if(ifid_is_itype && idex_is_jal) begin
         JalAChange <= (ifid_rs==5'd31);
         JalBChange <= (ifid_is_store && ifid_rt==5'd31);
     end
     else begin
         JalAChange <= 0;
         JalBChange <= 0;
+    end
+
+    if(ifid_is_rtype && memwr_is_jal) begin
+        RaAChange <= (ifid_rs==5'd31);
+        RaBChange <= (ifid_rt==5'd31);
+    end
+    else if(ifid_is_itype && memwr_is_jal) begin
+        RaAChange <= (ifid_rs==5'd31);
+        RaBChange <= (ifid_is_store && ifid_rt==5'd31);
+    end
+    else begin
+        RaAChange <= 0;
+        RaBChange <= 0;
     end
 
     if(ifid_is_rtype & exmem_is_rtype) begin

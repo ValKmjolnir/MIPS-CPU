@@ -7,6 +7,7 @@ wire        idexBusAChange,idexBusBChange;
 wire        exmemBusAChange,exmemBusBChange;
 wire        ALUinAChange,ALUinBChange;
 wire        LoadChange,JalAChange,JalBChange;
+wire        RaAChange,RaBChange;             // mem/wr jal/jalr ra register is changed
 wire[1:0]   ByteWidth;
 wire[4:0]   ALUopr,addrA,addrB,addrW;
 wire[15:0]  imm16;
@@ -25,8 +26,8 @@ assign shamt = {27'd0,ifid_out[10:6]};
 assign imm16 = ifid_out[15:0];
 assign immediate = ExtOp? (imm16[15]? {16'hffff,imm16}:{16'h0000,imm16}):{16'h0000,imm16};
 assign imm26 = ifid_out[25:0];
-assign realBusA = JalAChange? idex_out[159:128]:idexBusAChange?ALUres:(exmemBusAChange?exmem_out[95:64]:BusA);
-assign realBusB = JalBChange? idex_out[159:128]:idexBusBChange?ALUres:(exmemBusBChange?exmem_out[95:64]:BusB);
+assign realBusA = RaAChange? BusW:JalAChange? idex_out[159:128]:idexBusAChange?ALUres:(exmemBusAChange?exmem_out[95:64]:BusA);
+assign realBusB = RaBChange? BusW:JalBChange? idex_out[159:128]:idexBusBChange?ALUres:(exmemBusBChange?exmem_out[95:64]:BusB);
 assign idexALUinA = ShiftCtr?realBusB:realBusA;
 assign idexALUinB = ShamtCh?shamt:(ImmCh? immediate:(ShiftCtr? realBusA:realBusB));
 assign ALUinA = (ALUinAChange?BusW:idex_out[127:96]);
@@ -84,8 +85,10 @@ forwarding mips_fwd(
     ALUinAChange,     // change ALUinA
     ALUinBChange,     // change ALUinB
     LoadChange,       // change exmem:Din
-    JalAChange,       // change $31 if used
-    JalBChange        // change $31 if used
+    JalAChange,       // change $31 if used id/ex->if/id
+    JalBChange,       // change $31 if used id/ex->if/id
+    RaAChange,        // change $31 if used mem/wr->if/id
+    RaBChange         // change $31 if used mem/wr->if/id
 );
 
 endmodule
