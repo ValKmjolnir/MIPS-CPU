@@ -24,15 +24,15 @@ always@(posedge clk) begin
     if(idex_op==6'b000000 && idex_funct==6'b011000)
         {HI,LO} <= $signed(DataA)*$signed(DataB); // MULT calculation multi
     else if(idex_op==6'b000000 && idex_funct==6'b010010)
-        idex_out <= LO;                                // MFLO output/wr
+        idex_out <= LO;                           // MFLO output/wr
     else if(idex_op==6'b000000 && idex_funct==6'b010000)
-        idex_out <= HI;                                // MFHI output/wr
+        idex_out <= HI;                           // MFHI output/wr
     else if(idex_op==6'b000000 && idex_funct==6'b010011)
         LO <= DataA;                              // MTLO input
     else if(idex_op==6'b000000 && idex_funct==6'b010001)
         HI <= DataA;                              // MTHI input
     else if(idex_op==6'b010000 && idex_IR[25:21]==5'b00000)
-        idex_out <= register[idex_cs];                 // MFC0 output/wr
+        idex_out <= register[idex_cs];            // MFC0 output/wr
     else if(idex_op==6'b010000 && idex_IR[25:21]==5'b00100)
         register[idex_cd] <= DataB;               // MTC0 input
     else if(ifid_op==6'b000000 && ifid_funct==6'b001100) begin
