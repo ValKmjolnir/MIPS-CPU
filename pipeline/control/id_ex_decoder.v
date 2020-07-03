@@ -1,13 +1,14 @@
-module id_ex_decoder(idex_reg,OverflowCheck,ALUopr);
+module id_ex_decoder(idex_reg,OverflowCheck,ALUopr,ALU_Cp0_Ch);
 
 input wire[159:0] idex_reg;
 wire[5:0]         op,funct;
-output wire       OverflowCheck;
+output wire       OverflowCheck,ALU_Cp0_Ch;
 output reg[4:0]   ALUopr;
 
 assign op=idex_reg[31:26];
 assign funct=idex_reg[5:0];
 assign OverflowCheck=((op==6'b000000 & (funct==6'b100000 | funct==6'b100010)) | op==6'b001000);
+assign ALU_Cp0_Ch=(op==6'b000000 & (funct==6'b010010 | funct==6'b010000))|(op==6'b010000 & idex_reg[25:21]==5'b00000);
 
 always@(*) begin
     case(op)
