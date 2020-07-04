@@ -9,7 +9,6 @@ im instMem(PC,IR);
 
 initial begin
     PC <= 32'd0;        // 36 instructions
-    //PC <= 32'h00000034; // 45 instructions
 end
 
 always@(posedge clk or negedge reset) begin
