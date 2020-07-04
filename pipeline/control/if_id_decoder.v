@@ -1,8 +1,8 @@
-module if_id_decoder(ifid_reg,ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg,syscall,eret);
+module if_id_decoder(ifid_reg,ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg);
 
 input wire[63:0] ifid_reg;
 wire[5:0]        op,funct;
-output wire      ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg,syscall,eret;
+output wire      ExtOp,ImmCh,ShamtCh,ShiftCtr,Jump,JumpReg;
 
 assign op=ifid_reg[31:26];
 assign funct=ifid_reg[5:0];
@@ -52,7 +52,5 @@ assign ShiftCtr=(op==6'b000000 &&(
 ));
 assign Jump    = (op==6'b000010 | op==6'b000011);
 assign JumpReg = (op==6'b000000 && (funct==6'b001000 | funct==6'b001001));
-assign syscall = (op==6'b000000 && funct==6'b001100);
-assign eret    = (op==6'b010000 && funct==6'b011000);
 
 endmodule
