@@ -7,7 +7,7 @@ wire        IoprCtr,RegWr;                  // I-type instruction/regFile wEn
 wire        ExtOp,ImmCh,ShamtCh,ShiftCtr;   // imm16 extend-mode/choose imm16/choose shamt/swap BusA & BusB
 wire        MemWr,MemtoReg;                 // memory write/memory to regFile
 wire        Cout,ZF,OF,OverflowCheck;       // ALU used signals
-wire        DmSignExt,DmError;              // data memory used signals
+wire        DmSignExt;                      // data memory used signals
 wire        ALU_Cp0_outCh;                  // choose ALUres or Cp0Out as the input of ex/mem register
 wire        HazardCtr;
 wire        idexBusAChange,idexBusBChange;
@@ -121,7 +121,7 @@ ex_mem_decoder mips_exmem_dec(
     ByteWidth // byte width
 );
 
-dm         mips_dm(clk,exmem_out[95:64],MemWr,exmem_out[63:32],Dmout,ByteWidth,DmSignExt,DmError);
+dm         mips_dm(clk,exmem_out[95:64],MemWr,exmem_out[63:32],Dmout,ByteWidth,DmSignExt);
 mem_wr_reg mips_memwr(clk,exmem_out[127:96],exmem_out[95:64],Dmout,exmem_out[31:0],memwr_out);
 mem_wr_decoder    mips_memwr_dec(
     memwr_out,
